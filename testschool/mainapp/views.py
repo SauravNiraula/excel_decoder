@@ -1,5 +1,7 @@
 from django.shortcuts import render
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 import csv, io
 
@@ -47,9 +49,12 @@ def upload_file(request):
         return render(request, 'form.html', {'form': form})
 
 
-@csrf_exempt
+@api_view(['POST'])
 def search(request):
     if request.method == "POST":
-        data = request.POST
-        if not data['exam']:
+        data = request.data
+        if not 'exam__in' in data:
             return retJson("Exam not Selected")
+        students = Student.objects.filter(**data)
+        serialized_student = StudentSerializer(students, many=True)
+        return Response(serialized_student.data, status=status.HTTP_200_OK)

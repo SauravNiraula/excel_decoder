@@ -71,6 +71,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'testschool.wsgi.application'
 
+REST_FRAMEWORK = {
+    # 'DEFAULT_PERMISSION_CLASSES': (
+    #     'rest_framework.permissions.DjangoModelPermissions',
+    # )
+}
+
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
