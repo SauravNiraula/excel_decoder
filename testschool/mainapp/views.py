@@ -3,7 +3,7 @@ from rest_framework import generics, status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
-import csv, io
+import csv, io, openpyxl
 
 from mainapp.forms import FileForm
 from mainapp.models import Exam, Student
@@ -31,19 +31,20 @@ def upload_file(request):
                 return retJson("Not Accepted this file format")
             
             afile_text = io.TextIOWrapper(afile.file, encoding='utf-8')
-            text_file = None
+            text_file = []
             if afile_extension == 'csv':
                 text_file = csv.reader(afile_text, delimiter=",")
-            # else: 
-                # excel_file = xlrd.open_workbook(
+            else: 
+                excel_file = openpyxl.load_workbook(afile)
+                excel_file = excel_file.active
+                all_rows = excel_file.rows
+                for each_row in all_rows:
+                    text_file.append([ cell.value for cell in each_row ])
 
             exam = Exam(name=form.data['name'], date=form.data['date'])
             exam.save()
-            handle_csv(exam, list(text_file))
+            return handle_csv(exam, list(text_file))
             
-
-            return retJson("Data and File Accepted")
-        return retJson("Not Accepted")
 
     if request.method == "GET":
         return render(request, 'form.html', {'form': form})

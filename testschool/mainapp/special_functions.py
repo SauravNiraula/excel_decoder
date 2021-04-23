@@ -12,20 +12,27 @@ def retJson(message):
 
 def handle_csv(exam, results):
     i = 1
-    for each in results[1:]:
-        name_index = results[0].index('Name of Student')
-        dob_index = results[0].index('dob')
-        datetimeobject = datetime.strptime(each[dob_index],'%m/%d/%Y')
-        new_date = datetimeobject.strftime('%Y-%m-%d')
-        phone_index = results[0].index('phone')
-        gender_index = results[0].index('gender')
-        subjects = {}
-        for each_col in results[0]:
-            if each_col in VALID_SUBJECTS:
-                sub_index = results[0].index(each_col)
-                subjects[each_col] = each[sub_index]
+    print(results)
+    try:
+        for each in results[1:]:
+            name_index = results[0].index('Name of Student')
+            dob_index = results[0].index('dob')
+            datetimeobject = datetime.strptime(each[dob_index],'%m/%d/%Y')
+            new_date = datetimeobject.strftime('%Y-%m-%d')
+            phone_index = results[0].index('phone')
+            gender_index = results[0].index('gender')
+            subjects = {}
+            for each_col in results[0]:
+                if each_col in VALID_SUBJECTS:
+                    sub_index = results[0].index(each_col)
+                    subjects[each_col] = each[sub_index]
 
-        student = Student(name=each[name_index], dob=new_date, phone=each[phone_index], exam=exam, subjects=subjects)
-        student.save()
-        i += 1
+            student = Student(name=each[name_index], dob=new_date, phone=each[phone_index], exam=exam, subjects=subjects)
+            i += 1
+            print(i)
+            student.save()
+        return retJson("Data and File Accepted")
+    except:
+        exam.delete()
+        return retJson('could not save students')
         
