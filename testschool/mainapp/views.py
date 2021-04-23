@@ -55,6 +55,9 @@ def search(request):
         data = request.data
         if not 'exam__in' in data:
             return retJson("Exam not Selected")
-        students = Student.objects.filter(**data)
+        try:
+            students = Student.objects.filter(**data)
+        except:
+            return Response({'error': 'post data not valid'}, status=status.HTTP_400_BAD_REQUEST)
         serialized_student = StudentSerializer(students, many=True)
         return Response(serialized_student.data, status=status.HTTP_200_OK)

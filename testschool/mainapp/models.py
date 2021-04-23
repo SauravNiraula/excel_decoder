@@ -4,7 +4,6 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 
 
-VALID_SUBJECTS = ['Maths', 'English', 'Nepali', 'Social', 'Science', 'Optional Maths', 'Account']
 
 class Exam(models.Model):
     name = models.CharField(max_length=255, blank=False)
@@ -18,23 +17,23 @@ class Student(models.Model):
     name = models.CharField(max_length=255, blank=False)
     dob = models.DateField()
     phone = models.CharField(max_length=20)
-    # gender = models.BooleanField(default=0)
     exam = models.ForeignKey(Exam, on_delete=models.CASCADE, related_name='students')
+    subjects = models.JSONField()
 
     def __str__(self):
         return self.name
 
-    def save_subjects(self, columns, student):
-        for each in columns:
-            if each in VALID_SUBJECTS:
-                subject = Subject(name=each, score=student[columns.index(each)], student=self)
-                subject.save()
+    # def save_subjects(self, columns, student):
+    #     for each in columns:
+    #         if each in VALID_SUBJECTS:
+    #             subject = Subject(name=each, score=student[columns.index(each)], student=self)
+    #             subject.save()
 
 
-class Subject(models.Model):
-    name = models.CharField(max_length=255, blank=False)
-    score = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
-    student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='subjects')
+# class Subject(models.Model):
+#     name = models.CharField(max_length=255, blank=False)
+#     score = models.IntegerField(default=0, validators=[MinValueValidator(0), MaxValueValidator(100)])
+#     student = models.ForeignKey(Student, on_delete=models.CASCADE, related_name='subjects')
 
-    def __str__(self):
-        return self.name
+#     def __str__(self):
+#         return self.name
