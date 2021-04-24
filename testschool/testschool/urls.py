@@ -23,5 +23,7 @@ urlpatterns = [
     path('', mainapp_views.index),
     path('file/', mainapp_views.upload_file),
     path('student/', mainapp_views.StudentList.as_view()),
-    path('search/', mainapp_views.search),
+    path('api/search/', mainapp_views.api_search),
+    path('api/exams/', mainapp_views.ExamList.as_view()),
+    path('api/exams/<int:pk>', mainapp_views.ExamList.as_view()),
 ]

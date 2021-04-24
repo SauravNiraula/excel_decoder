@@ -15,3 +15,10 @@ class StudentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Student
         fields = ['id', 'name', 'dob', 'phone', 'subjects']
+
+
+class ExamSerializer(serializers.ModelSerializer):
+    students = StudentSerializer(many=True)
+    class Meta:
+        model = Exam
+        fields = ['id', 'name', 'date', 'students']

@@ -1,19 +1,18 @@
 from django.shortcuts import render
-from rest_framework import generics, status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import generics, status
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.response import Response
+from rest_framework.views import APIView
 import csv, io, openpyxl
 
 from mainapp.forms import FileForm
 from mainapp.models import Exam, Student
-from mainapp.serializers import StudentSerializer
+from mainapp.serializers import StudentSerializer, ExamSerializer
 from mainapp.special_functions import *
 
 
-class StudentList(generics.ListAPIView):
-    queryset = Student.objects.all()
-    serializer_class = StudentSerializer
+
 
 def index(request):
     exams = Exam.objects.all()
@@ -50,15 +49,42 @@ def upload_file(request):
         return render(request, 'form.html', {'form': form})
 
 
-@api_view(['POST'])
 def search(request):
+    pass
+        
+
+
+
+######## apis ########
+
+@csrf_exempt
+@api_view(['POST'])
+def api_search(request):
     if request.method == "POST":
         data = request.data
-        if not 'exam__in' in data:
-            return retJson("Exam not Selected")
+        print(data)
+        # if not 'exam__in' in data:
+        #     return retJson("Exam not Selected")
         try:
             students = Student.objects.filter(**data)
         except:
             return Response({'error': 'post data not valid'}, status=status.HTTP_400_BAD_REQUEST)
         serialized_student = StudentSerializer(students, many=True)
         return Response(serialized_student.data, status=status.HTTP_200_OK)
+
+
+class StudentList(generics.ListAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+
+class ExamList(APIView):
+
+    def get(self, request, pk=None):
+        if not pk:
+            exams = Exam.objects.all()
+        else:
+            exams = Exam.objects.filter(id=pk)
+        
+        print(exams)
+        return Response(ExamSerializer(exams, many=True).data, status=status.HTTP_200_OK)

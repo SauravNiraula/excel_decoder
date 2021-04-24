@@ -4,23 +4,207 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
     <title>{% block title %} Home {% endblock %}</title>
+    {% block css %}
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300&display=swap');
+        *{
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        .main-container {
+            width: 100vw;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 600;
+            font-size: 20px;
+            color: #0e271c;
+            letter-spacing: .5px;
+        }
+        .navbar {
+            position: fixed;
+            width: 78vw;
+        }
+        .flex-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: row;
+            height: 100%;
+            width: 100%;
+        }
+        .flex-1 {
+            min-height: 100vh;
+            position: fixed;
+            width: 20vw;
+            background-color: #3D9970;
+            border-right: 2vw solid white;
+        }
+        .flex-2 {
+            position: relative;
+            left: 20vw;
+            background-color: #3D9970;
+            width: 80vw;
+            border-left: 2vw solid white;
+        }
+        .table {
+            margin-top: 70px;
+        }
+        .exam-box {
+            width: 100%;
+            border-top: 5px solid #ffffff;
+            border-bottom: 5px solid #ffffff;
+            border-left: 5px solid #ffffff;
+            padding: 10px 20px;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+        .exam-box:hover {
+            background-color: #51c490;
+        }
+        .exam-date {
+            font-size: 14px;
+            margin-left: auto;
+        }
+    </style>
+    {% endblock %}
 </head>
 {% block body %}
 
 <body>
-    <form action="/search/" method="POST">
-        {% csrf_token %}
-        <input type="text" name="name" id="name"><br>
-        <input type="date" name="date" id="date"><br>
-        {% for each_exam in exams %}
-            {{each_exam}}
-            {{each_exam.id}}
-            <input type="checkbox" name="exam__in" value="{{each_exam.id}}"><br>
-        {% endfor %}
-        <input type="submit" value="submit">
-    </form>
+    <div class="main-container">
+        
+        <div class="flex-wrapper">
+            <div class="each-flex flex-1">
+                {% for each in exams %}
+                    <div class="exam-box" id="{{ each.id }}" onclick="get_exam_data( '{{each.id}}')">
+                        <span class="exam-name">{{each.name}}</span>
+                        <span class="exam-date">{{each.date}}</span>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="each-flex flex-2">
+                <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">Navbar</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                    <a class="nav-link active" aria-current="page" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link" href="#">Link</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Dropdown
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="#">Action</a></li>
+                        <li><a class="dropdown-item" href="#">Another action</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="#">Something else here</a></li>
+                    </ul>
+                    </li>
+                    <li class="nav-item">
+                    <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+                    </li>
+                </ul>
+                <form class="d-flex">
+                    <input class="form-control me-2" id="search" type="search" placeholder="Search" aria-label="Search">
+                    <div class="btn btn-outline-success" onclick="search(event)">Search</div>
+                </form>
+                </div>
+            </div>
+        </nav>
+                <table class="table">
+                
+                </table>
+            </div>
+        </div>
+    </div>
 </body>
 
+{% endblock %}
+{% block script %} 
+<script>
+    var table = document.getElementsByClassName('table')[0]
+    var valid_subs = ['English', 'Nepali', 'Social', 'Maths', 'Science', 'Optional Maths', 'Account']
+    var get_exam_data = function(id) {
+        console.log(id)
+        fetch('http://localhost:8000/api/exams/'+ id, {
+            method: 'get',
+        }).then(function(response) {
+            return response.json();
+        }).then(function(data) {
+            console.log(data)
+            inject_data(table, data[0].students, valid_subs)
+
+        })
+    }
+
+    function search(e) {
+        text = document.getElementById('search').value
+        if (text == "") {
+            return 
+        }
+        body = JSON.stringify({name: text})
+        console.log(body)
+        
+        fetch('http://localhost:8000/api/search/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json', 
+            },
+            body: body
+        })
+        .then(res => res.json())
+        .then(data => {
+            inject_data(table, data, valid_subs)
+        })
+        .catch( err => console.log(err))
+    }
+
+
+    var inject_data = function(table, students, valid_subs) {
+        tt = ''
+            tt += `<thead>
+                    <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Name of Student</th>
+                    <th scope="col">DOB</th>
+                    <th scope="col">phone</th>`
+            for (var each_sub in valid_subs) {
+                tt += `<th scope="col">${valid_subs[each_sub]}</th>`
+            }
+            tt += `
+                    </tr>
+                </thead>
+                <tbody>
+                    `
+            var i = 1
+            students.forEach(each => {
+                tt += '<tr>'
+                tt += `    <th scope="row">${i}</th>
+                    <td>${each.name}</td>
+                    <td>${each.dob}</td>
+                    <td>${each.phone}</td>
+                    `
+              // console.log(each)
+                subjects = each.subjects
+                valid_subs.forEach(each_sub => {
+                    tt += `<td>${subjects[each_sub]}</td>`
+                })
+                tt += `</tr></tbody>`
+                i += 1
+
+            });  
+            table.innerHTML = tt
+    }
+</script>
 {% endblock %}
 </html>
